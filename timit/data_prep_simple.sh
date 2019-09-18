@@ -100,26 +100,27 @@ else
 fi
 
 
-echo ============================================================================
-echo "                                  Main                                    "
-echo ============================================================================
-
-python main.py \
-  --data_path $TIMIT_PATH \
-  --dataset_save_path $DATASET_SAVE_PATH \
-  --feature_save_path $FEATURE_SAVE_PATH \
-  --config_path $RUN_ROOT_PATH/config \
-  --tool $TOOL \
-  --htk_save_path $HTK_SAVE_PATH \
-  --normalize $NORMALIZE \
-  --save_format $SAVE_FORMAT \
-  --feature_type $FEATURE_TYPE \
-  --channels $CHANNELS \
-  --window $WINDOW \
-  --slide $SLIDE \
-  --energy $ENERGY \
-  --delta $DELTA \
-  --deltadelta $DELTADELTA
+# we don't want to train here so we stop after extraction
+#echo ============================================================================
+#echo "                                  Main                                    "
+#echo ============================================================================
+#
+#python main.py \
+#  --data_path $TIMIT_PATH \
+#  --dataset_save_path $DATASET_SAVE_PATH \
+#  --feature_save_path $FEATURE_SAVE_PATH \
+#  --config_path $RUN_ROOT_PATH/config \
+#  --tool $TOOL \
+#  --htk_save_path $HTK_SAVE_PATH \
+#  --normalize $NORMALIZE \
+#  --save_format $SAVE_FORMAT \
+#  --feature_type $FEATURE_TYPE \
+#  --channels $CHANNELS \
+#  --window $WINDOW \
+#  --slide $SLIDE \
+#  --energy $ENERGY \
+#  --delta $DELTA \
+#  --deltadelta $DELTADELTA
 
 
 echo 'Successfully completed!!!'
