@@ -11,8 +11,131 @@ from os.path import basename
 import re
 from tqdm import tqdm
 
-from utils.labels.character import Char2idx
-from utils.util import mkdir_join
+import numpy as np
+
+
+class Char2idx(object):
+    """Convert from character to index.
+    Args:
+        vocab_file_path (string): path to the vocabulary file
+        space_mark (string, optional): the space mark to divide a sequence into words
+        capital_divide (bool, optional): if True, words will be divided by
+            capital letters. This is used for English.
+        double_letter (bool, optional): if True, group repeated letters.
+            This is used for Japanese.
+        remove_list (list, optional): characters to neglect
+    """
+
+    def __init__(self, vocab_file_path, space_mark='_', capital_divide=False,
+                 double_letter=False, remove_list=[]):
+        self.space_mark = space_mark
+        self.capital_divide = capital_divide
+        self.double_letter = double_letter
+        self.remove_list = remove_list
+
+        # Read the vocabulary file
+        self.map_dict = {}
+        vocab_count = 0
+        with open(vocab_file_path, 'r') as f:
+            for line in f:
+                char = line.strip()
+                if char in remove_list:
+                    continue
+                self.map_dict[char] = vocab_count
+                vocab_count += 1
+
+        # Add <SOS> & <EOS>
+        self.map_dict['<'] = vocab_count
+        self.map_dict['>'] = vocab_count + 1
+
+    def __call__(self, str_char):
+        """
+        Args:
+            str_char (string): a sequence of characters
+        Returns:
+            index_list (list): character indices
+        """
+        index_list = []
+
+        # Convert from character to index
+        if self.capital_divide:
+            for word in str_char.split(self.space_mark):
+                # Replace the first character with the capital letter
+                index_list.append(self.map_dict[word[0].upper()])
+
+                # Check double-letters
+                skip_flag = False
+                for i in range(1, len(word) - 1, 1):
+                    if skip_flag:
+                        skip_flag = False
+                        continue
+
+                    if not skip_flag and word[i:i + 2] in self.map_dict.keys():
+                        index_list.append(self.map_dict[word[i:i + 2]])
+                        skip_flag = True
+                    else:
+                        index_list.append(self.map_dict[word[i]])
+
+                # Final character
+                if not skip_flag:
+                    index_list.append(self.map_dict[word[-1]])
+
+        elif self.double_letter:
+            skip_flag = False
+            for i in range(len(str_char) - 1):
+                if skip_flag:
+                    skip_flag = False
+                    continue
+
+                if not skip_flag and str_char[i:i + 2] in self.map_dict.keys():
+                    index_list.append(self.map_dict[str_char[i:i + 2]])
+                    skip_flag = True
+                else:
+                    index_list.append(self.map_dict[str_char[i]])
+
+            # Final character
+            if not skip_flag:
+                index_list.append(self.map_dict[str_char[-1]])
+
+        else:
+            index_list = list(map(lambda x: self.map_dict[x], list(str_char)))
+
+        return np.array(index_list)
+
+import os
+
+
+def mkdir(path_to_dir):
+    """Make a new directory if the directory does not exist.
+    Args:
+        path_to_dir (string): path to a directory
+    Returns:
+        path (string): path to the new directory
+    """
+    if path_to_dir is not None and (not os.path.isdir(path_to_dir)):
+        os.mkdir(path_to_dir)
+    return path_to_dir
+
+
+def mkdir_join(path_to_dir, *dir_name):
+    """Concatenate root path and 1 or more paths, and make a new direcory if
+    the direcory does not exist.
+    Args:
+        path_to_dir (string): path to a diretcory
+        dir_name (string): a direcory name
+    Returns:
+        path to the new directory
+    """
+    if path_to_dir is None:
+        return path_to_dir
+
+    path_to_dir = mkdir(path_to_dir)
+    for i in range(len(dir_name)):
+        if i == len(dir_name) - 1 and '.' in dir_name[i]:
+            path_to_dir = os.path.join(path_to_dir, dir_name[i])
+        else:
+            path_to_dir = mkdir(os.path.join(path_to_dir, dir_name[i]))
+    return path_to_dir
 
 # NOTE:
 ############################################################

@@ -10,9 +10,120 @@ from __future__ import print_function
 from os.path import join, basename
 from tqdm import tqdm
 
-from utils.labels.phone import Phone2idx
-from utils.util import mkdir_join
-from timit.util import map_phone2phone
+import numpy as np
+
+
+class Phone2idx(object):
+    """Convert from phone to index.
+    Args:
+        vocab_file_path (string): path to the vocabulary file
+        remove_list (list, optional): phones to neglect
+    """
+
+    def __init__(self, vocab_file_path, remove_list=[]):
+        # Read the vocabulary file
+        self.map_dict = {}
+        vocab_count = 0
+        with open(vocab_file_path, 'r') as f:
+            for line in f:
+                phone = line.strip()
+                if phone in remove_list:
+                    continue
+                self.map_dict[phone] = vocab_count
+                vocab_count += 1
+
+        # Add <SOS> & <EOS>
+        self.map_dict['<'] = vocab_count
+        self.map_dict['>'] = vocab_count + 1
+
+    def __call__(self, str_phone):
+        """
+        Args:
+            str_phone (string): string of space-divided phones
+        Returns:
+            index_list (np.ndarray): phone indices
+        """
+        # Convert from phone to the corresponding indices
+        phone_list = str_phone.split(' ')
+        index_list = list(map(lambda x: self.map_dict[x], phone_list))
+
+        return np.array(index_list)
+
+
+import os
+
+
+def mkdir(path_to_dir):
+    """Make a new directory if the directory does not exist.
+    Args:
+        path_to_dir (string): path to a directory
+    Returns:
+        path (string): path to the new directory
+    """
+    if path_to_dir is not None and (not os.path.isdir(path_to_dir)):
+        os.mkdir(path_to_dir)
+    return path_to_dir
+
+
+def mkdir_join(path_to_dir, *dir_name):
+    """Concatenate root path and 1 or more paths, and make a new direcory if
+    the direcory does not exist.
+    Args:
+        path_to_dir (string): path to a diretcory
+        dir_name (string): a direcory name
+    Returns:
+        path to the new directory
+    """
+    if path_to_dir is None:
+        return path_to_dir
+
+    path_to_dir = mkdir(path_to_dir)
+    for i in range(len(dir_name)):
+        if i == len(dir_name) - 1 and '.' in dir_name[i]:
+            path_to_dir = os.path.join(path_to_dir, dir_name[i])
+        else:
+            path_to_dir = mkdir(os.path.join(path_to_dir, dir_name[i]))
+    return path_to_dir
+
+
+def map_phone2phone(phone_list, label_type, map_file_path):
+    """Map from 61 phones to 39 or 48 phones.
+    Args:
+        phone_list (list): list of 61 phones (string)
+        label_type (string): phone39 or phone48 or phone61
+        map_file_path (string): path to the phone2phone mapping file
+    Returns:
+        mapped_phone_list (list): list of phones (string)
+    """
+    if label_type == 'phone61':
+        return phone_list
+
+    # read a mapping file
+    map_dict = {}
+    with open(map_file_path, 'r') as f:
+        for line in f:
+            line = line.strip().split()
+            if line[1] != 'nan':
+                if label_type == 'phone48':
+                    map_dict[line[0]] = line[1]
+                elif label_type == 'phone39':
+                    map_dict[line[0]] = line[2]
+            else:
+                map_dict[line[0]] = ''
+
+    # mapping from 61 phones to 39 or 48 phones
+    mapped_phone_list = []
+    for i in range(len(phone_list)):
+        if phone_list[i] in map_dict.keys():
+            mapped_phone_list.append(map_dict[phone_list[i]])
+        else:
+            mapped_phone_list.append(phone_list[i])
+
+    # ignore "q"
+    while '' in mapped_phone_list:
+        mapped_phone_list.remove('')
+
+    return mapped_phone_list
 
 
 def read_phone(label_paths, vocab_file_save_path, save_vocab_file=False,
