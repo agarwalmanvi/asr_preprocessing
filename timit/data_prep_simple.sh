@@ -2,6 +2,9 @@
 
 echo ============================================================================
 echo "                                  TIMIT                                    "
+echo "This script preprocesses the TIMIT dataset with HTK."
+echo "Newly generated .htk files are stored in place"
+echo "(next to files of original dataset)."
 echo ============================================================================
 
 ### Set paths
