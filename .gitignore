@@ -3,7 +3,6 @@
 __pychache__
 *.log
 *.pyc
-*.scp
 .nfs*
 nohup.out
 word*.txt
