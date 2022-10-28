@@ -18,3 +18,5 @@ librispeech/test/test_label_phone.py
 # CSJ
 *dialog*
 *_ss*
+
+.idea

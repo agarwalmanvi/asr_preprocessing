@@ -5,9 +5,12 @@ echo "                                  TIMIT                                   
 echo ============================================================================
 
 ### Set paths
-TIMIT_PATH='/home/dsalaj/datasets/timit'
-DATASET_ROOT_PATH='/home/dsalaj/datasets/timit'
-HCOPY_PATH='/usr/local/bin/HCopy'
+#TIMIT_PATH='/home/dsalaj/datasets/timit'
+#DATASET_ROOT_PATH='/home/dsalaj/datasets/timit'
+TIMIT_PATH='/tungstenfs/scratch/gzenke/agarmanv/data/TIMIT'
+DATASET_ROOT_PATH='/tungstenfs/scratch/gzenke/agarmanv/data/TIMIT'
+#HCOPY_PATH='/usr/local/bin/HCopy'
+HCOPY_PATH='/ereborfs/agarmanv/htk/custom_bin/bin/HCopy'
 
 ### Select one tool to extract features (HTK is the fastest)
 TOOL='htk'
